@@ -162,7 +162,7 @@ router.post("/", function (req, res, next) {
     }
 
     pokemonToPost.types.forEach((type) => {
-      if (!pokemonTypes.includes(type.trim().toLowerCase())) {
+      if (!pokemonTypes.includes(type.toLowerCase())) {
         throw new Error("Pokémon's type is invalid.");
       }
     });
