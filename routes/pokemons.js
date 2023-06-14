@@ -146,7 +146,12 @@ router.post("/", function (req, res, next) {
     const pokemons = JSON.parse(db);
     const { data, totalPokemons } = pokemons;
 
-    const pokemonToPost = { name, types: types.split(","), id, url };
+    const pokemonToPost = {
+      name,
+      types: types.split(",").map((type) => type.trim()),
+      id,
+      url,
+    };
 
     if (!id || !name || !url || !types) {
       throw new Error("Missing required data (name, url, types, id)");
