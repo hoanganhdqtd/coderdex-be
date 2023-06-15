@@ -148,7 +148,7 @@ router.post("/", function (req, res, next) {
 
     const pokemonToPost = {
       name,
-      types: types.split(",").map((type) => type.trim()),
+      types: types.split(",").map((type) => type.trim().toLowerCase()),
       id,
       url,
     };
@@ -162,7 +162,7 @@ router.post("/", function (req, res, next) {
     }
 
     pokemonToPost.types.forEach((type) => {
-      if (!pokemonTypes.includes(type.toLowerCase())) {
+      if (!pokemonTypes.includes(type)) {
         throw new Error("Pokémon's type is invalid.");
       }
     });
@@ -198,19 +198,24 @@ router.put("/:id", function (req, res, next) {
   try {
     const { params, body } = req;
     const { id } = params;
-    const { name, url, types, id: updateId } = body;
+    const { name, url, types, id: newId } = body;
 
-    if (!id || !name || !url || !types) {
-      throw new Error("Missing required data (name, url, types, id)");
+    if (!newId && !name && !url && !types) {
+      throw new Error(
+        "At least one of these fields (name, url, types, id) required to update"
+      );
     }
 
-    const typesArray = types.split(",");
+    const typesArray = types
+      .split(",")
+      .map((type) => type.trim().toLowerCase());
+
     if (typesArray.length > 2) {
       throw new Error("Pokémon can only have one or two types.");
     }
 
     typesArray.forEach((type) => {
-      if (!pokemonTypes.includes(type.trim().toLowerCase())) {
+      if (!pokemonTypes.includes(type)) {
         throw new Error("Pokémon's type is invalid.");
       }
     });
@@ -226,13 +231,29 @@ router.put("/:id", function (req, res, next) {
       throw new Error("Not found pokémon to update");
     }
 
-    pokemonToUpdate = {
-      ...pokemonToUpdate,
-      id: updateId,
-      name,
-      url,
-      types: types.split(",").map((type) => type.trim()),
-    };
+    // pokemonToUpdate = {
+    //   ...pokemonToUpdate,
+    //   id: newId,
+    //   name,
+    //   url,
+    //   types: typesArray,
+    // };
+
+    if (newId) {
+      pokemonToUpdate.id = newId;
+    }
+
+    if (name) {
+      pokemonToUpdate.name = name;
+    }
+
+    if (url) {
+      pokemonToUpdate.url = url;
+    }
+
+    if (types) {
+      pokemonToUpdate.types = typesArray;
+    }
 
     const result = {
       data: [...data.filter((pokemon) => pokemon.id !== id), pokemonToUpdate],

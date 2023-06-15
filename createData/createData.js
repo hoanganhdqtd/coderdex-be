@@ -7,8 +7,10 @@ const createData = async () => {
   // array of Pokemon objects
   // console.log("newData", newData);
 
+  let totalPokemons = 721;
+
   newData = new Set(newData);
-  newData = Array.from(newData).slice(0, 721);
+  newData = Array.from(newData).slice(0, totalPokemons);
 
   // console.log("newData", newData);
   let index = 0;
