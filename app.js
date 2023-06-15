@@ -5,9 +5,9 @@ var logger = require("morgan");
 require("dotenv").config();
 var cors = require("cors");
 
-var indexRouter = require("../routes/index");
-var usersRouter = require("../routes/users");
-var pokemonsRouter = require("../routes/pokemons");
+var indexRouter = require("./routes/index");
+var usersRouter = require("./routes/users");
+var pokemonsRouter = require("./routes/pokemons");
 
 var app = express();
 

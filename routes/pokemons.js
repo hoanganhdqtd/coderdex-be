@@ -146,16 +146,16 @@ router.post("/", function (req, res, next) {
     const pokemons = JSON.parse(db);
     const { data, totalPokemons } = pokemons;
 
+    if (!id || !name || !url || !types) {
+      throw new Error("Missing required data (name, url, types, id)");
+    }
+
     const pokemonToPost = {
       name,
       types: types.split(",").map((type) => type.trim().toLowerCase()),
       id,
       url,
     };
-
-    if (!id || !name || !url || !types) {
-      throw new Error("Missing required data (name, url, types, id)");
-    }
 
     if (pokemonToPost.types.length > 2) {
       throw new Error("Pokémon can only have one or two types.");
@@ -206,20 +206,6 @@ router.put("/:id", function (req, res, next) {
       );
     }
 
-    const typesArray = types
-      .split(",")
-      .map((type) => type.trim().toLowerCase());
-
-    if (typesArray.length > 2) {
-      throw new Error("Pokémon can only have one or two types.");
-    }
-
-    typesArray.forEach((type) => {
-      if (!pokemonTypes.includes(type)) {
-        throw new Error("Pokémon's type is invalid.");
-      }
-    });
-
     const db = fs.readFileSync("pokemons.json", "utf-8");
 
     const { data, totalPokemons } = JSON.parse(db);
@@ -252,6 +238,20 @@ router.put("/:id", function (req, res, next) {
     }
 
     if (types) {
+      const typesArray = types
+        .split(",")
+        .map((type) => type.trim().toLowerCase());
+
+      if (typesArray.length > 2) {
+        throw new Error("Pokémon can only have either one or two types.");
+      }
+
+      typesArray.forEach((type) => {
+        if (!pokemonTypes.includes(type)) {
+          throw new Error("Pokémon's type is invalid.");
+        }
+      });
+
       pokemonToUpdate.types = typesArray;
     }
 
