@@ -141,14 +141,14 @@ router.post("/", function (req, res, next) {
     // const { url, params, query, body } = req;
     // const { name, id, url, types } = req.body;
 
-    const { name, id, url, type1, type2 } = req.body;
+    let { name, id, url, types } = req.body;
+    name = name?.trim()?.toLowerCase();
+    url = url?.trim()?.toLowerCase();
+    id = id?.trim()?.toLowerCase();
 
-    let types = [];
-    if (type1.trim().length) {
-      types = types.push(type1.trim().toLowerCase());
-    }
-    if (type2.trim().length) {
-      types = types.push(type2.trim().toLowerCase());
+    // types = [types[0].trim().toLowerCase(), types[1].trim().toLowerCase()];
+    for (let i = 0; i < types.length; i++) {
+      types[i] = types[i]?.trim()?.toLowerCase();
     }
 
     const db = fs.readFileSync("pokemons.json", "utf-8");
@@ -156,14 +156,14 @@ router.post("/", function (req, res, next) {
     const pokemons = JSON.parse(db);
     const { data, totalPokemons } = pokemons;
 
-    if (!id || !name || !url || !types.length) {
+    if (!(types[0].length || types[1].length) || !id || !name || !url) {
       throw new Error("Missing required data (name, url, types, id)");
     }
 
     const pokemonToPost = {
       name,
       // types: types.split(",").map((type) => type.trim().toLowerCase()),
-      types,
+      types: [],
       id,
       url,
     };
@@ -172,11 +172,25 @@ router.post("/", function (req, res, next) {
     //   throw new Error("Pokémon can only have one or two types.");
     // }
 
-    pokemonToPost.types.forEach((type) => {
-      if (!pokemonTypes.includes(type.trim().toLowerCase())) {
-        throw new Error("Pokémon's type is invalid.");
+    types.forEach((type) => {
+      if (type) {
+        if (!pokemonTypes.includes(type)) {
+          throw new Error("Pokémon's type is invalid.");
+        }
+        pokemonToPost.types.push(type);
       }
+
+      // if (formattedType) {
+      //   if (!pokemonTypes.includes(formattedType)) {
+      //     throw new Error("Pokémon's type is invalid.");
+      //   }
+      //   pokemonToPost.types.push(formattedType);
+      // }
     });
+
+    // if (!pokemonToPost.types.length) {
+    //   throw new Error("Pokémon's type is invalid.");
+    // }
 
     data.forEach((pokemon) => {
       if (pokemon.name === name || pokemon.id === id) {
@@ -209,17 +223,17 @@ router.put("/:id", function (req, res, next) {
   try {
     const { params, body } = req;
     const { id } = params;
-    // const { name, url, types, id: newId } = body;
-    const { name, url, type1, type2, id: newId } = body;
-    let types = [];
-    if (type1.trim().length) {
-      types.push(type1.trim().toLowerCase());
-    }
-    if (type2.trim().length) {
-      types.push(type1.trim().toLowerCase());
+    let { name, url, types, id: newId } = body;
+
+    name = name?.trim()?.toLowerCase();
+    url = url?.trim()?.toLowerCase();
+    newId = newId?.trim()?.toLowerCase();
+
+    for (let i = 0; i < types.length; i++) {
+      types[i] = types[i]?.trim()?.toLowerCase();
     }
 
-    if (!newId && !name && !url && !types.length) {
+    if (!newId && !name && !url && !(types[0].length || types[1].length)) {
       throw new Error(
         "At least one of these fields (name, url, types, id) required to update"
       );
@@ -245,10 +259,20 @@ router.put("/:id", function (req, res, next) {
     // };
 
     if (newId) {
+      data.forEach((pokemon) => {
+        if (pokemon.id !== id && pokemon.id === newId) {
+          throw new Error("The Pokémon does exist.");
+        }
+      });
       pokemonToUpdate.id = newId;
     }
 
     if (name) {
+      data.forEach((pokemon) => {
+        if (pokemon.name === name && pokemon.id !== id) {
+          throw new Error("The Pokémon does exist.");
+        }
+      });
       pokemonToUpdate.name = name;
     }
 
@@ -256,22 +280,37 @@ router.put("/:id", function (req, res, next) {
       pokemonToUpdate.url = url;
     }
 
+    // if (types) {
+    //   // const typesArray = types
+    //   //   .split(",")
+    //   //   .map((type) => type.trim().toLowerCase());
+
+    //   if (types.length > 2) {
+    //     throw new Error("Pokémon can only have either one or two types.");
+    //   }
+
+    //   types.forEach((type) => {
+    //     if (!pokemonTypes.includes(type)) {
+    //       throw new Error("Pokémon's type is invalid.");
+    //     }
+    //   });
+
+    //   pokemonToUpdate.types = types;
+    // }
+
     if (types) {
-      // const typesArray = types
-      //   .split(",")
-      //   .map((type) => type.trim().toLowerCase());
-
-      if (types.length > 2) {
-        throw new Error("Pokémon can only have either one or two types.");
-      }
-
+      pokemonToUpdate.types = [];
       types.forEach((type) => {
-        if (!pokemonTypes.includes(type)) {
-          throw new Error("Pokémon's type is invalid.");
+        if (type) {
+          if (!pokemonTypes.includes(type)) {
+            throw new Error("Pokémon's type is invalid.");
+          }
+          pokemonToUpdate.types.push(type);
         }
       });
-
-      pokemonToUpdate.types = types;
+      if (!pokemonToUpdate.types.length) {
+        throw new Error("Pokémon's type is invalid.");
+      }
     }
 
     const result = {
