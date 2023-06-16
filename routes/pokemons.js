@@ -139,14 +139,24 @@ router.get("/:id", function (req, res, next) {
 router.post("/", function (req, res, next) {
   try {
     // const { url, params, query, body } = req;
-    const { name, id, url, types } = req.body;
+    // const { name, id, url, types } = req.body;
+
+    const { name, id, url, type1, type2 } = req.body;
+
+    let types = [];
+    if (type1.trim().length) {
+      types = types.push(type1.trim().toLowerCase());
+    }
+    if (type2.trim().length) {
+      types = types.push(type2.trim().toLowerCase());
+    }
 
     const db = fs.readFileSync("pokemons.json", "utf-8");
 
     const pokemons = JSON.parse(db);
     const { data, totalPokemons } = pokemons;
 
-    if (!id || !name || !url || !types) {
+    if (!id || !name || !url || !types.length) {
       throw new Error("Missing required data (name, url, types, id)");
     }
 
@@ -158,12 +168,12 @@ router.post("/", function (req, res, next) {
       url,
     };
 
-    if (pokemonToPost.types.length > 2) {
-      throw new Error("Pokémon can only have one or two types.");
-    }
+    // if (pokemonToPost.types.length > 2) {
+    //   throw new Error("Pokémon can only have one or two types.");
+    // }
 
     pokemonToPost.types.forEach((type) => {
-      if (!pokemonTypes.includes(type)) {
+      if (!pokemonTypes.includes(type.trim().toLowerCase())) {
         throw new Error("Pokémon's type is invalid.");
       }
     });
@@ -199,9 +209,17 @@ router.put("/:id", function (req, res, next) {
   try {
     const { params, body } = req;
     const { id } = params;
-    const { name, url, types, id: newId } = body;
+    // const { name, url, types, id: newId } = body;
+    const { name, url, type1, type2, id: newId } = body;
+    let types = [];
+    if (type1.trim().length) {
+      types.push(type1.trim().toLowerCase());
+    }
+    if (type2.trim().length) {
+      types.push(type1.trim().toLowerCase());
+    }
 
-    if (!newId && !name && !url && !types) {
+    if (!newId && !name && !url && !types.length) {
       throw new Error(
         "At least one of these fields (name, url, types, id) required to update"
       );
@@ -239,21 +257,21 @@ router.put("/:id", function (req, res, next) {
     }
 
     if (types) {
-      const typesArray = types
-        .split(",")
-        .map((type) => type.trim().toLowerCase());
+      // const typesArray = types
+      //   .split(",")
+      //   .map((type) => type.trim().toLowerCase());
 
-      if (typesArray.length > 2) {
+      if (types.length > 2) {
         throw new Error("Pokémon can only have either one or two types.");
       }
 
-      typesArray.forEach((type) => {
+      types.forEach((type) => {
         if (!pokemonTypes.includes(type)) {
           throw new Error("Pokémon's type is invalid.");
         }
       });
 
-      pokemonToUpdate.types = typesArray;
+      pokemonToUpdate.types = types;
     }
 
     const result = {
