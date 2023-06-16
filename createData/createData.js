@@ -24,7 +24,7 @@ const createData = async () => {
     // url: `/images/${index}.png`,
     // url: `http://localhost:5000/images/${index}.png`,
     // url: `./public/images/${index}.png`,
-    url: `https://github.com/hoanganhdqtd/coderdex-be/tree/main/public/images/${index}.png`,
+    url: `https://coderdex-be-production-691e.up.railway.app/images/${index}.png`,
   }));
 
   // console.log("newData", newData);
