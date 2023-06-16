@@ -152,7 +152,8 @@ router.post("/", function (req, res, next) {
 
     const pokemonToPost = {
       name,
-      types: types.split(",").map((type) => type.trim().toLowerCase()),
+      // types: types.split(",").map((type) => type.trim().toLowerCase()),
+      types,
       id,
       url,
     };
